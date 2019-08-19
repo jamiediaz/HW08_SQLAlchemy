@@ -18,7 +18,7 @@ Base.prepare(engine, reflect=True)
 Base.classes.keys()
 
 # Save references to each table
-Measurement = Base.classes.measurement
+# Measurement = Base.classes.measurement
 Station = Base.classes.station
 
 #################################################
@@ -36,21 +36,56 @@ def welcome():
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/station<br/>"
-        f"/api/v1.0/measurement"
+        f"/api/v1.0/precip"
     )
 
 @app.route("/api/v1.0/station")
-def names():
+def station():
     # Create our session (link) from Python to the DB
     session = Session(engine)
 
     """Return a list of all station names"""
     # Query all passengers
-    results = session.query(Station.name).all()
+    results = session.query(Station.station, Station.name, Station.latitude, Station.longitude, Station.elevation).all()
 
     session.close()
 
-    # Convert list of tuples into normal list
-    all_names = list(np.ravel(results))
+    all_stations = []
+    for station, name, latitude, longitude, elevation in results:
+        station_dict = {}
+        station_dict["station"] = station
+        station_dict["name"] = name
+        station_dict["latitude"] = latitude
+        station_dict["longitude"] = longitude
+        station_dict["elevation"] = elevation
+        all_stations.append(station_dict)
 
-    return jsonify(all_names)
+    # Convert list of tuples into normal list
+    # all_names = list(np.ravel(results))
+
+    return jsonify(all_stations)
+
+@app.route("/api/v1.0/precip")
+def precip():
+    
+    results = engine.execute("""SELECT date, 
+                                       prcp 
+                                FROM measurement
+                                
+    """)
+    
+
+    all_precip = []
+    for date, prcp in results:
+        precip_dict = {}
+        precip_dict["date"] = date
+        precip_dict["prcp"] = prcp
+        
+        all_precip.append(precip_dict)
+    print(all_precip)
+    
+    return jsonify(all_precip)
+    
+
+if __name__ == '__main__':
+    app.run(debug=True, port=5009)
