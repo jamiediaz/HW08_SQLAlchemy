@@ -20,6 +20,7 @@ Base.classes.keys()
 # Save references to each table
 # Measurement = Base.classes.measurement
 Station = Base.classes.station
+Measurement = Base.classes.measurement
 
 #################################################
 # Flask Setup
@@ -36,6 +37,7 @@ def welcome():
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/station<br/>"
+        f"/api/v1.0/measurement<br/>"
         f"/api/v1.0/precip<br/>"
         f"/api/v1.0/tobs"
     )
@@ -65,6 +67,29 @@ def station():
     # all_names = list(np.ravel(results))
 
     return jsonify(all_stations)
+
+@app.route("/api/v1.0/measurement")
+def measurement():
+    # Create our session (link) from Python to the DB
+    session = Session(engine)
+
+    """Return a list of all station names"""
+    # Query all passengers
+    results = session.query(Measurement.station, Measurement.date, Measurement.prcp, Measurement.tobs).all()
+
+    session.close()
+
+    all_measurement = []
+    for station, date, prcp, tobs in results:
+        measurement_dict = {}
+        measurement_dict["station"] = station
+        measurement_dict["name"] = name
+        measurement_dict["latitude"] = latitude
+        measurement_dict["longitude"] = longitude
+        
+        all_measurement.append(measurement_dict)
+
+    return jsonify(all_measurement)
 
 @app.route("/api/v1.0/precip")
 def precip():
@@ -109,6 +134,12 @@ def tobs():
 
     return jsonify(all_tobs)
 
+@app.route("/api.v1.0/<start>")
+def start_date():
+    """Fetch data from start date to end.  
+    Start date needs to be YYYY-MM-DD"""
+
+    
 
 if __name__ == '__main__':
     app.run(debug=True, port=5009)
