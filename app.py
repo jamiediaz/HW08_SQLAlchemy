@@ -36,7 +36,8 @@ def welcome():
     return (
         f"Available Routes:<br/>"
         f"/api/v1.0/station<br/>"
-        f"/api/v1.0/precip"
+        f"/api/v1.0/precip<br/>"
+        f"/api/v1.0/tobs"
     )
 
 @app.route("/api/v1.0/station")
@@ -78,14 +79,36 @@ def precip():
     all_precip = []
     for date, prcp in results:
         precip_dict = {}
-        precip_dict["date"] = date
-        precip_dict["prcp"] = prcp
+        # precip_dict["date"] = date
+        precip_dict[date] = prcp
         
         all_precip.append(precip_dict)
-    print(all_precip)
+    
     
     return jsonify(all_precip)
-    
+
+@app.route("/api/v1.0/tobs")   
+def tobs():
+    results = engine.execute("""SELECT date, 
+                                       tobs
+                                       
+                                FROM measurement
+                                WHERE date >=  (SELECT date('2017-08-23', '-1 year'))   
+                                    
+                                
+
+                                
+    """)
+    all_tobs = []
+    for date, tobs in results:
+        tobs_dict = {}
+        tobs_dict["date"] = date
+        tobs_dict["tobs"] = tobs
+
+        all_tobs.append(tobs_dict)
+
+    return jsonify(all_tobs)
+
 
 if __name__ == '__main__':
     app.run(debug=True, port=5009)
