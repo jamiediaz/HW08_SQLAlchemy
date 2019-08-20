@@ -134,12 +134,56 @@ def tobs():
 
     return jsonify(all_tobs)
 
-@app.route("/api.v1.0/<start>")
-def start_date():
-    """Fetch data from start date to end.  
-    Start date needs to be YYYY-MM-DD"""
-
+@app.route('/api/v1.0/<startdate>')
+def start_date(startdate):
     
+    # """Fetch data from start date to end.  
+    # Start date needs to be YYYY-MM-DD"""
+    
+
+    results = engine.execute(f"""SELECT MIN(tobs) AS tmin,
+                                       AVG(tobs) AS tavg,
+                                       MAX(tobs) AS tmax
+                                FROM measurement
+                                WHERE date >= {startdate}
+                            """)
+    all_start = []
+    for tmin, tavg, tmax in results:
+        start_dict = {}
+        start_dict["tmin"] = tmin
+        start_dict["tavg"] = tavg
+        start_dict["tmax"] = tmax
+
+        all_start.append(start_dict)
+
+    return jsonify(all_start)
+
+
+@app.route('/api/v1.0/<startdate>/<enddate>')
+def start_end(startdate,enddate):
+    
+    # """Fetch data from start date to end.  
+    # Start date needs to be YYYY-MM-DD"""
+    
+
+    results = engine.execute(f"""SELECT MIN(tobs) AS tmin,
+                                       AVG(tobs) AS tavg,
+                                       MAX(tobs) AS tmax
+                                FROM measurement
+                                WHERE date >= {startdate}
+                                AND date <= {enddate}
+                            """)
+    
+    # all_startend = []
+    # for tmin, tavg, tmax in results:
+    #     startend_dict = {}
+    #     startend_dict["tmin"] = tmin
+    #     startend_dict["tavg"] = tavg
+    #     startend_dict["tmax"] = tmax
+
+    #     all_startend.append(startend_dict)
+    print(results)
+    # return (results)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5009)
