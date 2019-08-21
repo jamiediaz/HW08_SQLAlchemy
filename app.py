@@ -159,8 +159,8 @@ def start_date(startdate):
     return jsonify(all_start)
 
 
-@app.route('/api/v1.0/<startdate>/<enddate>')
-def start_end(startdate,enddate):
+@app.route('/api/v1.0/<start_date>/<end_date>')
+def start_end(start_date,end_date):
     
     # """Fetch data from start date to end.  
     # Start date needs to be YYYY-MM-DD"""
@@ -170,20 +170,20 @@ def start_end(startdate,enddate):
                                        AVG(tobs) AS tavg,
                                        MAX(tobs) AS tmax
                                 FROM measurement
-                                WHERE date >= {startdate}
-                                AND date <= {enddate}
+                                WHERE date >= {start_date}
+                                AND date < {end_date}
                             """)
     
-    # all_startend = []
-    # for tmin, tavg, tmax in results:
-    #     startend_dict = {}
-    #     startend_dict["tmin"] = tmin
-    #     startend_dict["tavg"] = tavg
-    #     startend_dict["tmax"] = tmax
+    all_start_end = []
+    for tmin, tavg, tmax in results:
+        start_end_dict = {}
+        start_end_dict["tmin"] = tmin
+        start_end_dict["tavg"] = tavg
+        start_end_dict["tmax"] = tmax
 
-    #     all_startend.append(startend_dict)
-    print(results)
-    # return (results)
+        all_start_end.append(start_end_dict)
+    
+    return jsonify(all_start_end)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5009)
