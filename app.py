@@ -53,11 +53,12 @@ def station():
     session = Session(engine)
 
     """Return a list of all station names"""
-    # Query all passengers
+    # Query all Station tables using ORM and save to results
     results = session.query(Station.station, Station.name, Station.latitude, Station.longitude, Station.elevation).all()
 
     session.close()
-
+    # Loop through results and grab the column data and put them into the station_dict.  
+    # Then append them to teh all_stations list. 
     all_stations = []
     for station, name, latitude, longitude, elevation in results:
         station_dict = {}
@@ -71,6 +72,7 @@ def station():
     # Convert list of tuples into normal list
     # all_names = list(np.ravel(results))
 
+    #jsonify the all_stations list for easy reading. 
     return jsonify(all_stations)
 
 @app.route("/api/v1.0/measurement")
@@ -79,7 +81,7 @@ def measurement():
     session = Session(engine)
 
     """Return a list of all station names"""
-    # Query all passengers
+    # Query all columns in measurement
     results = session.query(Measurement.station, Measurement.date, Measurement.prcp, Measurement.tobs).all()
 
     session.close()
@@ -98,18 +100,18 @@ def measurement():
 
 @app.route("/api/v1.0/precip")
 def precip():
-    
+    #here we use SQL queries to get the data. 
     results = engine.execute("""SELECT date, 
                                        prcp 
                                 FROM measurement
                                 
     """)
-    
+    #same as above, we put the values into dictionaries and append them to the API list. 
 
     all_precip = []
     for date, prcp in results:
         precip_dict = {}
-        # precip_dict["date"] = date
+        # As per the instructions, we will set 'date' as the key and 'prcp' as the value in this API
         precip_dict[date] = prcp
         
         all_precip.append(precip_dict)
@@ -121,14 +123,9 @@ def precip():
 def tobs():
     results = engine.execute("""SELECT date, 
                                        tobs
-                                       
                                 FROM measurement
                                 WHERE date >=  (SELECT date('2017-08-23', '-1 year'))   
-                                    
-                                
-
-                                
-    """)
+                            """)
     all_tobs = []
     for date, tobs in results:
         tobs_dict = {}
@@ -140,11 +137,9 @@ def tobs():
     return jsonify(all_tobs)
 
 @app.route('/api/v1.0/<startdate>')
+# This puts takes what is in <startdate> and puts it in the function. 
 def start_date(startdate):
-    
-    
-    
-
+    #remember to use quotes around the {startdate} otherwise it will subtract MM and DD from YYYY. 
     results = engine.execute(f"""SELECT date,
                                         MIN(tobs) AS tmin,
                                         AVG(tobs) AS tavg,
@@ -169,8 +164,7 @@ def start_date(startdate):
 @app.route('/api/v1.0/<start_date>/<end_date>')
 def start_end(start_date,end_date):
     
-    
-
+    # saved the query to run_sql for debugging purposes. 
     run_sql = f"""SELECT date,
                          MIN(tobs) AS tmin,
                          AVG(tobs) AS tavg,
