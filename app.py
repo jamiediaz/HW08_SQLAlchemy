@@ -39,7 +39,12 @@ def welcome():
         f"/api/v1.0/station<br/>"
         f"/api/v1.0/measurement<br/>"
         f"/api/v1.0/precip<br/>"
-        f"/api/v1.0/tobs"
+        f"/api/v1.0/tobs<br/>"
+        f"<p>/api/v1.0/&ltstartdate&gt<br/>"   
+        f"this will find min, max, and avg from <date> to last recorded day<br/>"
+        f"<p>/api/v1.0/&ltstart_date&gt/&ltend_date&gt<br/>" 
+        f"this will return min, max, and avg for the date range<br/>"
+        f"<p>Dates need to be in YYYY-MM-DD format"
     )
 
 @app.route("/api/v1.0/station")
@@ -137,14 +142,13 @@ def tobs():
 @app.route('/api/v1.0/<startdate>')
 def start_date(startdate):
     
-    # """Fetch data from start date to end.  
-    # Start date needs to be YYYY-MM-DD"""
+    
     
 
     results = engine.execute(f"""SELECT date,
                                         MIN(tobs) AS tmin,
-                                       AVG(tobs) AS tavg,
-                                       MAX(tobs) AS tmax
+                                        AVG(tobs) AS tavg,
+                                        MAX(tobs) AS tmax
                                 FROM measurement
                                 WHERE date >= '{startdate}'
                                 GROUP BY date
@@ -165,13 +169,12 @@ def start_date(startdate):
 @app.route('/api/v1.0/<start_date>/<end_date>')
 def start_end(start_date,end_date):
     
-    # """Fetch data from start date to end.  
-    # Start date needs to be YYYY-MM-DD"""
+    
 
     run_sql = f"""SELECT date,
-                    MIN(tobs) AS tmin,
-                    AVG(tobs) AS tavg,
-                    MAX(tobs) AS tmax
+                         MIN(tobs) AS tmin,
+                         AVG(tobs) AS tavg,
+                         MAX(tobs) AS tmax
                     FROM measurement
                     WHERE date BETWEEN '{start_date}' AND '{end_date}'
                     GROUP BY date
