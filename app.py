@@ -141,15 +141,18 @@ def start_date(startdate):
     # Start date needs to be YYYY-MM-DD"""
     
 
-    results = engine.execute(f"""SELECT MIN(tobs) AS tmin,
+    results = engine.execute(f"""SELECT date,
+                                        MIN(tobs) AS tmin,
                                        AVG(tobs) AS tavg,
                                        MAX(tobs) AS tmax
                                 FROM measurement
                                 WHERE date >= '{startdate}'
+                                GROUP BY date
                             """)
     all_start = []
-    for tmin, tavg, tmax in results:
+    for date, tmin, tavg, tmax in results:
         start_dict = {}
+        start_dict["date"] = date
         start_dict["tmin"] = tmin
         start_dict["tavg"] = tavg
         start_dict["tmax"] = tmax
@@ -165,11 +168,13 @@ def start_end(start_date,end_date):
     # """Fetch data from start date to end.  
     # Start date needs to be YYYY-MM-DD"""
 
-    run_sql = f"""SELECT MIN(tobs) AS tmin,
+    run_sql = f"""SELECT date,
+                    MIN(tobs) AS tmin,
                     AVG(tobs) AS tavg,
                     MAX(tobs) AS tmax
                     FROM measurement
                     WHERE date BETWEEN '{start_date}' AND '{end_date}'
+                    GROUP BY date
                 """
     
     # print("run_sql:", run_sql)
@@ -177,9 +182,9 @@ def start_end(start_date,end_date):
     results = engine.execute(run_sql)
     
     all_start_end = []
-    for tmin, tavg, tmax in results:
+    for date, tmin, tavg, tmax in results:
         start_end_dict = {}
-        # start_end_dict['date'] = date
+        start_end_dict['date'] = date
         start_end_dict["tmin"] = tmin
         start_end_dict["tavg"] = tavg
         start_end_dict["tmax"] = tmax
